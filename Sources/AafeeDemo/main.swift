@@ -21,7 +21,7 @@ struct AafeeCommand: AsyncParsableCommand {
     static var configuration = CommandConfiguration(
         commandName: "aafee",
         abstract: "AafeeLib Demo Application",
-        subcommands: [GreetCommand.self, TestFlowCommand.self],//, LogLevelCommand.self],
+        subcommands: [TestFlowCommand.self],//, LogLevelCommand.self],
         defaultSubcommand: TestFlowCommand.self
     )
 }
@@ -65,34 +65,6 @@ struct TestFlowCommand: AsyncParsableCommand {
         try await flow.run()
         
         print("PEEKED : \(afterAgentValue)")
-    }
-}
-
-// Define the greet subcommand
-@available(macOS 10.15, macCatalyst 13, iOS 13, tvOS 13, watchOS 6, *)
-struct GreetCommand: AsyncParsableCommand {
-    static var configuration = CommandConfiguration(
-        commandName: "greet",
-        abstract: "Generate a greeting"
-    )
-    
-    @Argument(help: "Name to greet")
-    var name: String = "World"
-    
-    @Flag(name: .long, help: "Show verbose output")
-    var verbose: Bool = false
-    
-    func run() throws {
-        // Create a logger
-        var logger = Logger(label: "com.glacio.aafeedemo")
-        logger.logLevel = verbose ? .debug : .info
-        
-        // Create an instance of our library with the logger
-        let lib = AafeeLib()
-        
-        // Use our library to generate a greeting
-        let greeting = lib.greet(name: name)
-        print(greeting)
     }
 }
 
