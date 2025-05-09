@@ -20,11 +20,13 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
 //        .package(url: "https://github.com/ptliddle/swifty-prompts.git", branch: "main"),
-        .package(path: "../../Libraries/SwiftyPrompts"),
+//        .package(path: "../../Libraries/SwiftyPrompts"),
+            .package(url: "https://github.com/ptliddle/swifty-prompts.git", branch: "main"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.3"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.3"),
 //        .package(url: "https://github.com/ptliddle/swifty-json-schema.git", branch: "main"), // Adjust URL and version as needed
-        .package(path: "../../Libraries/SwiftyFirecrawl"),
+//        .package(path: "../../Libraries/SwiftyFirecrawl"),
+        .package(url: "https://github.com/glaciotech/SwiftFirecrawl", branch: "main")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -33,11 +35,9 @@ let package = Package(
             name: "AafeeLib",
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
-                .product(name: "SwiftyPrompts", package: "SwiftyPrompts"),
-                .product(name: "SwiftyPrompts.OpenAI", package: "SwiftyPrompts"),
-                .product(name: "SwiftyPrompts.Tools", package: "SwiftyPrompts"),
-//                .product(name: "SwiftyJsonSchema", package: "swifty-json-schema"),
-                .product(name: "SwiftFirecrawl", package: "SwiftyFirecrawl")
+                .product(name: "SwiftyPrompts", package: "swifty-prompts"),
+                .product(name: "SwiftyPrompts.OpenAI", package: "swifty-prompts"),
+                .product(name: "SwiftFirecrawl", package: "SwiftFirecrawl")
             ]),
         .executableTarget(
             name: "AafeeDemo",
