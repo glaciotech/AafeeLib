@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swift-server/async-http-client.git",
       "state" : {
-        "revision" : "333f51104b75d1a5b94cb3b99e4c58a3b442c9f7",
-        "version" : "1.25.2"
+        "revision" : "3b265e6a00fc5c3fdb8f91f773e506990c704337",
+        "version" : "1.26.0"
       }
     },
     {
@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/johnmai-dev/Jinja",
       "state" : {
-        "revision" : "31c4dd39bcdc07eaa42a384bdc88ea599022b800",
-        "version" : "1.1.2"
+        "revision" : "8879db488805122463b6521486d4c0a557fb56dc",
+        "version" : "1.2.0"
       }
     },
     {

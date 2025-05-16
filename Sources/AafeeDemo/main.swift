@@ -21,7 +21,7 @@ struct AafeeCommand: AsyncParsableCommand {
     static var configuration = CommandConfiguration(
         commandName: "aafee",
         abstract: "AafeeLib Demo Application",
-        subcommands: [TestFlowCommand.self],//, LogLevelCommand.self],
+        subcommands: [TestFlowCommand.self, TestToolUsingAgentCommand.self],//, LogLevelCommand.self],
         defaultSubcommand: TestFlowCommand.self
     )
 }
@@ -66,6 +66,15 @@ struct TestFlowCommand: AsyncParsableCommand {
         
         print("PEEKED : \(afterAgentValue)")
     }
+}
+
+@available(macOS 10.15, macCatalyst 13, iOS 13, tvOS 13, watchOS 6, *)
+struct TestToolUsingAgentCommand: AsyncParsableCommand {
+    
+    func run() async throws {
+        // No code
+    }
+    
 }
 
 //// Define a command to change log level

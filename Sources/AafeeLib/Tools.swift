@@ -19,6 +19,8 @@ public enum OutputType {
 }
 
 
+protocol FlowStageContainer {}
+
 
 public struct CLIAppTool {}
 
@@ -70,6 +72,30 @@ public struct WriteToFileTool: FlowStage {
         return input
     }
 }
+
+public struct ReadFromFileTool: FlowStage {
+    
+    // Get the shared documents directory URL
+    let documentsDirectoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+
+    public var basePath: URL
+    public var fileName: String
+    
+    init(basePath: URL? = nil, fileName: String) {
+        self.basePath = basePath ?? documentsDirectoryURL
+        self.fileName = fileName
+    }
+    
+    public func execute(_ input: InOutType?) async throws -> InOutType {
+        
+        let fullPath = basePath.appending(path: fileName)
+        let fileContent = try String(contentsOf: fullPath)
+        logger.info("Read data from \(fileContent)")
+        
+        return .string(fileContent)
+    }
+}
+
 
 @resultBuilder
 public struct FlowBuilder {
