@@ -60,6 +60,8 @@ public struct WriteToFileTool: FlowStage {
                     return string
             case .none:
                 return nil
+            case .instruction(let output):
+                return output.text
             }
         }() else {
             throw WriteToFileToolError.noInput
@@ -117,3 +119,5 @@ public struct FlowBuilder {
 //        expression
 //    }
 }
+
+
