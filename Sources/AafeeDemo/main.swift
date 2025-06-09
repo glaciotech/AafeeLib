@@ -36,9 +36,9 @@ struct TestFlowCommand: AsyncParsableCommand {
     func run() async throws {
 
         let fc = try FirecrawlTool(url: "https://platform.openai.com/docs/pricing")
-        let agent = try AgentTool(model: "gpt-4o", prompt: "Extract out the pricing in JSON format")
+        let agent = try OneShotAgentTool(model: "gpt-4o", prompt: "Extract out the pricing in JSON format")
         let fileWriter = WriteToFileTool(fileName: "pricing.json")
-        let agentToSwift = try AgentTool(model: "gpt-4o", prompt: """
+        let agentToSwift = try OneShotAgentTool(model: "gpt-4o", prompt: """
         Convert the json for the latest models into a dictionary of initalized swift structs with data from the json. The struct should look like this
         ```swift
             struct ModelPricing {
@@ -96,7 +96,7 @@ struct TestMultiStepCommand: AsyncParsableCommand {
     
     func run() async throws {
         
-        let agent = try AgentTool(model: "gpt-4o",
+        let agent = try OneShotAgentTool(model: "gpt-4o",
                                   prompt: """
 You're a helpful conversational agent who knows the capital of all countries. You should ask a user for a country, then return the capital of the country they provide.
 After each stage you should include an instruction of whether to CONTINUE or END, depending on whether you need input or the conversation is finished. The instruction should be formatted as
@@ -214,10 +214,14 @@ struct TestToolUsingAgentCommand: AsyncParsableCommand {
 }
 
 public struct ToolCallWrapper: FlowStage {
+
     
     var agent: FlowStage
     
     
+    public func execute(_ input: InOutType?) async throws -> InOutType {
+        return InOutType.none
+    }
     
 }
 
@@ -231,11 +235,11 @@ public struct KeywordSearchContainer: FlowStage {
     }
     
     public func execute(_ input: InOutType?) async throws -> InOutType {
-        guard let input = input, case let InOutType.JSON(string) = input {
+        guard let input = input, case let InOutType.JSON(string) = input else {
             return .none
         }
 
-        
+        return InOutType.none
     }
 }
 
@@ -343,7 +347,7 @@ struct TestCollabMeGatherInfo: AsyncParsableCommand {
         let agentWithHistory = HistoryProvider(wrappedStage: agent)
         
         #warning("This should be changed out for a StopContinueAgent with tool calling capability for RAG")
-        let oneShotGVIKeywordAgent = try AgentTool(model: model, prompt: """
+        let oneShotGVIKeywordAgent = try OneShotAgentTool(model: model, prompt: """
             Here’s a summary for creating a video from a collection of videos. You can assume you have access to an archive of videos and can search for video clips that match the details in this summary. You should identify keywords to search the archive for to find the right type of video. 
             """)
         
@@ -413,6 +417,58 @@ struct TestCollabMeGatherInfo: AsyncParsableCommand {
         print(GVIKeywordOuput)
     }
 }
+
+struct TestCollabMeCreateVideoWithJ2V: AsyncParsableCommand {
+    
+    func run() async throws {
+        
+        let model = "gpt-40" // doesn't work using default
+        
+        let agent = try! OneShotAgentTool(model: model, prompt: """
+            You're an expert in video creation especially with the JSON2Video API. Your task is to take in a bunch of clips along
+            with a description of what the video should be like and output JSON dictating how to edit the video that can be sent to the
+            JSON2Video API.
+            """)
+    }
+    
+}
+
+struct RandomClipPicker: FlowStage {
+
+    
+    let clips = ["https://drive.google.com/file/d/1N79_oXdsVqDkz4PEa1GDNtesLuTff_ye/view?usp=drive_link",
+                 "https://drive.google.com/file/d/1wIGXbERN_D9N-6Mx7GUbOfMtjj88_gpF/view?usp=drive_link",
+                 "https://drive.google.com/file/d/1dSHu4j_tXEkbSluSaci97WbJADueY6GF/view?usp=drive_link",
+                 "https://drive.google.com/file/d/1v_l_4j74mSta0rUumr9g18vcTopXle4I/view?usp=drive_link",
+                 "https://drive.google.com/file/d/1aLRa8LYCM-8H1l_TSVC9DBMt2njqkJv7/view?usp=drive_link",
+                 "https://drive.google.com/file/d/1LyzBllHXqOsOzmTD3dIu7uPNywhLUOg0/view?usp=drive_link",
+                 "https://drive.google.com/file/d/1cCxeWSnC8_G43ga6gf4-0r299aEWgP0c/view?usp=drive_link", 
+                 "https://drive.google.com/file/d/1Moq9D9iwfC2YUzCbvxkHPJrdd3zBGpL1/view?usp=drive_link",
+                 "https://drive.google.com/file/d/1yKBZRuPUIXpPyFlc-tx0gaok7afTxrXy/view?usp=drive_link",
+                 "https://drive.google.com/file/d/1AC4XPTOyFiS3PvbgENC-BGcpvNZke-ju/view?usp=drive_link",
+                 "https://drive.google.com/file/d/1qFcyBsamEjSgYG3ketd1FcfiFq0OZT69/view?usp=drive_link"
+    ]
+    
+    func pickRandomElements<T>(from array: [T], count: Int) -> [T] {
+        // Ensure that the count doesn't exceed the number of elements in the array
+        guard count <= array.count else {
+            return array
+        }
+        
+        return Array(array.shuffled().prefix(count))
+    }
+    
+    func execute(_ input: InOutType?) async throws -> InOutType {
+        let randomClips = pickRandomElements(from: clips, count: 4)
+        let asJSONData = try JSONSerialization.data(withJSONObject: randomClips)
+        guard let jsonString = String(data: asJSONData, encoding: .utf8) else {
+            throw NSError(domain: "Couldn't turn random clips to JSON string", code: 0)
+        }
+        return InOutType.JSON(jsonString)
+    }
+}
+
+
 
 //// Define a command to change log level
 //struct LogLevelCommand: ParsableCommand {

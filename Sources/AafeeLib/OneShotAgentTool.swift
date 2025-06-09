@@ -32,6 +32,8 @@ public enum InOutType {
     case md(String)
     case none
     case instruction(InstructionOutput)
+    case structured(Codable.Type, Codable)
+    case array([String])
     
     public var text: String {
         get throws {
@@ -41,6 +43,10 @@ public enum InOutType {
             case let .instruction(output):
                 return output.text
             case .none:
+                throw InOutTypeError.notTextRepresentable
+            case .array(let texts):
+                return "[\(texts.joined(separator: ", "))]"
+            default:
                 throw InOutTypeError.notTextRepresentable
             }
         }
@@ -56,7 +62,52 @@ enum AgentToolError: Error {
     case noValidInput
 }
 
-public struct AgentTool: FlowStage {
+public struct StructuredOutputOneShotAgentTool<O>: FlowStage where O: ProducesJSONSchema {
+    
+    public let AGENT_API_KEY = "AGENT_API_KEY"
+    
+    public var apiKey: String
+    public var model: String
+    public var prompt: PromptTemplate
+    
+    public var preSendMessageModifier: (([Message]) -> [Message]) = { return $0 }
+    public var postSendMessageModifier: (([Message]) -> [Message]) = { return $0 }
+    
+    public init(apiKey: String? = nil, model: String, prompt: PromptTemplate,
+                preSendMessageModifier: @escaping ([Message]) -> [Message] = { return $0 },
+                postSendMessageModifier: @escaping ([Message]) -> [Message] = { return $0 } ) throws {
+        
+        guard let apiKey = apiKey ?? UserDefaults.standard.string(forKey: AGENT_API_KEY) else {
+            throw AgentToolError.noAPIKey
+        }
+ 
+        self.apiKey = apiKey
+        self.model = model
+        self.prompt = prompt
+        self.preSendMessageModifier = preSendMessageModifier
+        self.postSendMessageModifier = postSendMessageModifier
+    }
+    
+    public func execute(_ input: InOutType?) async throws -> InOutType {
+        let runner = SwiftyPrompts.JSONSchemaPromptRunner<O>()
+        
+        let llm = OpenAILLM(apiKey: self.apiKey)
+        
+        guard let input = input, let inputTextRep = try? input.text else {
+            throw AgentToolError.noValidInput
+        }
+        
+        logger.debug("Agent Tool running with \(input)")
+        
+        let msgs: [Message] = [.system(.text(prompt.text)), .user(.text(inputTextRep))]
+        let msgsToSend = preSendMessageModifier(msgs)
+        let output = try await runner.run(with: msgsToSend, on: llm)
+        
+        return .structured(O.self, output.output)
+    }
+}
+
+public struct OneShotAgentTool: FlowStage {
     
     public static let AGENT_API_KEY = "AGENT_API_KEY"
     
@@ -84,6 +135,7 @@ public struct AgentTool: FlowStage {
     
     public func execute(_ input: InOutType?) async throws -> InOutType {
         let runner = SwiftyPrompts.BasicPromptRunner()
+        
         let llm = OpenAILLM(apiKey: self.apiKey)
         
         guard let input = input, let inputTextRep = try? input.text else {
