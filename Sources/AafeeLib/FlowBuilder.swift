@@ -48,9 +48,9 @@ public struct LoopedStageFlow: FlowStage {
     }
     
     let stages: [any FlowStage]
-    var executeNextStep: (_ prevOutput: InOutType?) -> ProcessInstruction
+    var executeNextStep: (_ prevOutput: InOutType?) async throws -> ProcessInstruction
     
-    public init(@FlowBuilder _ stages: () -> [any FlowStage], executeNextStep: @escaping (InOutType?) -> ProcessInstruction = {_ in return .stop} ) {
+    public init(@FlowBuilder _ stages: () -> [any FlowStage], executeNextStep: @escaping (InOutType?) async throws -> ProcessInstruction = {_ in return .stop} ) {
         self.stages = stages()
         self.executeNextStep = executeNextStep
     }
@@ -70,7 +70,7 @@ public struct LoopedStageFlow: FlowStage {
         }
         
         // Call execute next step which allows modification before running whole stage again
-        guard case let ProcessInstruction.proceed(modifiedInput) = executeNextStep(previousOutput) else {
+        guard case let ProcessInstruction.proceed(modifiedInput) = try await executeNextStep(previousOutput) else {
             return previousOutput
         }
         

@@ -29,10 +29,13 @@ public class HistoryProvider<F>: FlowStage where F: FlowStage, F: PreSendInterce
     
     
     func preSendMessageModifier(templateMsgs: [Message], inputMsgs: [Message]) -> [Message] {
+        
+        let oldHistory = msgHistory
+        
         msgHistory.append(contentsOf: inputMsgs)
         
         // Add the template msgs then the history then the latest input
-        return templateMsgs + msgHistory + inputMsgs
+        return templateMsgs + oldHistory + inputMsgs
     }
     
     func postSendOutputModifier(text: String) -> String {
@@ -45,3 +48,6 @@ public class HistoryProvider<F>: FlowStage where F: FlowStage, F: PreSendInterce
         logger.debug("\(msg)")
     }
 }
+
+
+
