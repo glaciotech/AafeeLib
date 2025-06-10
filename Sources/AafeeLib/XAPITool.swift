@@ -5,7 +5,14 @@
 //  Created by Peter Liddle on 5/12/25.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 import Foundation
+
+
+
 
 enum XAPIError: Error {
     case invalidResponse
