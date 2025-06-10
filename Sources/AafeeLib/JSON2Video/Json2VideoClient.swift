@@ -1,5 +1,8 @@
-import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
+import Foundation
 
 
 /// A client for interacting with the Json2Video API
