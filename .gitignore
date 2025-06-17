@@ -16,3 +16,4 @@ DerivedData/
 /.swiftpm/xcode/xcshareddata/xcschemes/AafeeLib.xcscheme
 /.swiftpm/xcode/xcshareddata/xcschemes/AafeeLib-Package.xcscheme
 /.vscode/launch.json
+Package.resolved

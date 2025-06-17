@@ -19,14 +19,16 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
+        
 //        .package(url: "https://github.com/ptliddle/swifty-prompts.git", branch: "main"),
+        .package(url: "https://github.com/ptliddle/swifty-prompts.git", from: "0.1.0"),
 //        .package(path: "../../Libraries/SwiftyPrompts"),
-            .package(url: "https://github.com/ptliddle/swifty-prompts.git", branch: "main"),
+
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.3"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.3"),
-        .package(url: "https://github.com/ptliddle/swifty-json-schema.git", branch: "main"), // Adjust URL and version as needed
+//        .package(url: "https://github.com/ptliddle/swifty-json-schema.git", from: "0.1.0"), // Adjust URL and version as needed
 //        .package(path: "../../Libraries/SwiftyFirecrawl"),
-        .package(url: "https://github.com/glaciotech/SwiftFirecrawl", branch: "main"),
+        .package(url: "https://github.com/glaciotech/SwiftFirecrawl", from: "0.1.0"),
 //        .package(path: "../../Libraries/SwiftyJsonSchema")
     ],
     targets: [
@@ -36,10 +38,10 @@ let package = Package(
             name: "AafeeLib",
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
-                .product(name: "SwiftyPrompts", package: "swifty-prompts"),
-                .product(name: "SwiftyPrompts.OpenAI", package: "swifty-prompts"),
+                .product(name: "SwiftyPrompts", package: "swifty-prompts"), // "SwiftyPrompts"),
+                .product(name: "SwiftyPrompts.OpenAI", package: "swifty-prompts"), // "SwiftyPrompts"), //
                 .product(name: "SwiftFirecrawl", package: "SwiftFirecrawl"),
-                .product(name: "SwiftyJsonSchema", package: "swifty-json-schema"),
+//                .product(name: "SwiftyJsonSchema", package: "swifty-json-schema"),
                
             ]),
         .executableTarget(
