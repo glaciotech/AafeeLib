@@ -5,7 +5,7 @@ import SwiftyJsonSchema
 final class Json2VideoTests: XCTestCase {
     
     // Replace with your actual API key for testing
-    private let apiKey = Environment.get("J2V_API_KEY")!
+//    private let apiKey = Environment.get("J2V_API_KEY")!
     
 //    func testCreateSimpleMovie() {
 //        let expectation = XCTestExpectation(description: "Create simple movie")

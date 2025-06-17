@@ -18,6 +18,12 @@ extension Content {
         switch self {
         case .text(let text):
             return text
+        case .fileId(let fileId):
+            return "FileName: \(fileId)"
+        case let .image(data, type):
+            return "IMAGE TYPE: \(type)"
+        case .imageUrl(let url):
+            return "IMAGE URL: \(url)"
         }
     }
 }
