@@ -1,11 +1,12 @@
 import XCTest
 @testable import AafeeLib
 import SwiftyJsonSchema
+import Foundation
 
 final class Json2VideoTests: XCTestCase {
     
     // Replace with your actual API key for testing
-//    private let apiKey = Environment.get("J2V_API_KEY")!
+    private let apiKey = UserDefaults.standard.string(forKey: "J2V_API_KEY")!
     
 //    func testCreateSimpleMovie() {
 //        let expectation = XCTestExpectation(description: "Create simple movie")
@@ -236,7 +237,7 @@ final class Json2VideoTests: XCTestCase {
     
     func testJ2VSchemaGeneration() async throws {
         
-        let schema = try JsonSchemaCreator.createJSONSchema(for: Movie.self)
+        let schema = JsonSchemaCreator.createJSONSchema(from: Movie.self)
         print(schema)
     }
     

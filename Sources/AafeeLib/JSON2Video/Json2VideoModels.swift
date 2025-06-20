@@ -455,17 +455,18 @@ public struct Scene: Codable, ProducesJSONSchema {
 }
 
 /// Element in a scene
-public protocol SceneElement: Codable {
+public protocol SceneElement: Codable, ProducesJSONSchema {
     /// Type of the element
     var type: String { get }
 }
 
-public struct AnySceneElement: Codable {
+public struct AnySceneElement: Codable, JSONSchemaOneOfDiscriminatedUnion {
+    public var allowedTypes: [any SwiftyJsonSchema.ProducesJSONSchema.Type] = [ImageElement.self, VideoElement.self, TextElement.self, AudioElement.self, VoiceElement.self, SubtitlesElement.self]
     
     var type: String
-    var wrappedSceneElement: Any
+    var wrappedSceneElement: Codable
     
-    init(type: String, wrappedSceneElement: Any) {
+    init(type: String, wrappedSceneElement: Codable) {
         self.type = type
         self.wrappedSceneElement = wrappedSceneElement
     }
@@ -555,6 +556,8 @@ public struct AnySceneElement: Codable {
 
 /// Image element
 public struct ImageElement: SceneElement {
+    public static var exampleValue: ImageElement = ImageElement(src: "http://google.com/fdjkshfkd.png", position: "center", width: 100, height: 200)
+    
     /// Type of the element (always "image")
     @SchemaInfo(description: "Type of the element (always 'image')")
     public var type: String = "image"
@@ -656,6 +659,8 @@ public struct TextElement: SceneElement, ProducesJSONSchema {
 
 /// Audio element
 public struct AudioElement: SceneElement {
+    public static var exampleValue: AudioElement = AudioElement(src: "https://audio.com/kjfdshfdksj.mp3")
+    
     /// Type of the element (always "audio")
     @SchemaInfo(description: "Type of the element (always 'audio')")
     public var type: String = "audio"
@@ -671,6 +676,8 @@ public struct AudioElement: SceneElement {
 
 /// Voice element for AI-generated speech
 public struct VoiceElement: SceneElement {
+    public static var exampleValue: VoiceElement = VoiceElement(text: "This is some text to convert to speech", voice: "British Female")
+    
     /// Type of the element (always "voice")
     @SchemaInfo(description: "Type of the element (always 'voice')")
     public var type: String = "voice"
@@ -691,6 +698,9 @@ public struct VoiceElement: SceneElement {
 
 /// Subtitles element
 public struct SubtitlesElement: SceneElement {
+    
+    public static var exampleValue: SubtitlesElement = SubtitlesElement(src: "http://subtitles.com/subtitles.txt")
+    
     /// Type of the element (always "subtitles")
     @SchemaInfo(description: "Type of the element (always 'subtitles')")
     public var type: String = "subtitles"
