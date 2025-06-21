@@ -41,11 +41,11 @@ final class FirecrawlMCPIntegrationTests: XCTestCase {
         let result = try await scrapeStage.execute(InOutType.none)
         
         // Verify we got a non-empty result
-        XCTAssertNotNil(result.text)
-        XCTAssertFalse(result.text?.isEmpty ?? true)
+        XCTAssertNotNil(try? result.text)
+        XCTAssertFalse((try? result.text.isEmpty) ?? true)
         
         // Verify the result contains expected content from example.com
-        if let text = result.text {
+        if let text = try? result.text {
             XCTAssertTrue(text.contains("Example Domain") || text.contains("example"), "Result should contain content from example.com")
         }
     }
@@ -64,11 +64,11 @@ final class FirecrawlMCPIntegrationTests: XCTestCase {
         let result = try await searchStage.execute(InOutType.none)
         
         // Verify we got a non-empty result
-        XCTAssertNotNil(result.text)
-        XCTAssertFalse(result.text?.isEmpty ?? true)
+        XCTAssertNotNil(try result.text)
+        XCTAssertFalse((try? result.text.isEmpty) ?? true)
         
         // Verify the result is valid JSON and contains search results
-        if let text = result.text, let data = text.data(using: .utf8) {
+        if let text = try? result.text, let data = text.data(using: .utf8) {
             do {
                 let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
                 XCTAssertNotNil(json)
@@ -105,11 +105,11 @@ final class FirecrawlMCPIntegrationTests: XCTestCase {
         let result = try await researchStage.execute(InOutType.none)
         
         // Verify we got a non-empty result
-        XCTAssertNotNil(result.text)
-        XCTAssertFalse(result.text?.isEmpty ?? true)
+        XCTAssertNotNil(try? result.text)
+        XCTAssertFalse((try? result.text.isEmpty) ?? true)
         
         // Verify the result contains meaningful content
-        if let text = result.text {
+        if let text = try? result.text {
             XCTAssertTrue(text.count > 100, "Deep research result should be substantial")
             XCTAssertTrue(text.contains("Swift") || text.contains("programming") || text.contains("practices"), 
                          "Result should be relevant to the query")
@@ -122,7 +122,7 @@ final class FirecrawlMCPIntegrationTests: XCTestCase {
         
         // Execute the flow
         // This should not throw any exceptions if the MCP server is working correctly
-        try await flow.run()
+        try await flow.execute(nil)
     }
     
     func testChainedMCPOperations() async throws {
@@ -134,7 +134,7 @@ final class FirecrawlMCPIntegrationTests: XCTestCase {
             // Then, take the first result URL and scrape it
             // This demonstrates how to use the output of one MCP operation as input to another
             CustomFlowStage { input in
-                guard let inputText = input?.text,
+                guard let inputText = try input?.text,
                       let data = inputText.data(using: .utf8),
                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                       let results = json["results"] as? [[String: Any]],
@@ -149,7 +149,7 @@ final class FirecrawlMCPIntegrationTests: XCTestCase {
             
             // Now scrape the URL from the search result
             CustomFlowStage { input in
-                guard let url = input?.text else {
+                guard let url = try input?.text else {
                     throw MCPServerError.invalidInput
                 }
                 
@@ -162,7 +162,7 @@ final class FirecrawlMCPIntegrationTests: XCTestCase {
         }
         
         // Execute the flow
-        try await flow.run()
+        try await flow.execute(nil)
     }
 }
 

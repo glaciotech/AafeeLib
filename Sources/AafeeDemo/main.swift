@@ -507,4 +507,25 @@ struct RandomClipPicker: FlowStage {
 
 //try await TestMultiStepCommandWithStopGoAgent().run()
 
-try await TestCollabMeGatherInfo().run()
+//try await TestCollabMeGatherInfo().run()
+
+
+// Test MCP
+
+let jsonConfig = """
+    {
+      "name": "swift-mcp-server-example",
+        "executablePath": "/Users/peterliddle/Library/Developer/Xcode/DerivedData/SwiftMCPServerExample-evrhsjumswrkvyfjqxkqjvqvffat/Build/Products/Debug/SwiftMCPServerExample",
+        "arguments": [],
+        "environment": {}
+    }
+    """
+
+let decoder = JSONDecoder()
+let config = try decoder.decode(LocalMCPServerConfig.self, from: jsonConfig.data(using: .ascii)!)
+
+//let config = LocalMCPServerConfig(name: "SwiftServerTest",
+let mcp = LocalMCProcess(config: config)
+let client = try await mcp.start()
+print(try await client.listTools())
+

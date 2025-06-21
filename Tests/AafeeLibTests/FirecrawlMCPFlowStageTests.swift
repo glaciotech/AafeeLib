@@ -55,7 +55,7 @@ class TestMCPServerFlowStage: FlowStage {
         var requestParams: [String: Any] = parameters ?? [:]
         
         // If we have input from a previous stage, try to incorporate it
-        if let input = input, let inputText = input.text {
+        if let input = input, let inputText = try? input.text {
             // Try to parse the input as JSON if it's in JSON format
             if case .JSON(let jsonString) = input {
                 if let jsonData = jsonString.data(using: .utf8),
@@ -171,7 +171,7 @@ final class FirecrawlMCPFlowStageTests: XCTestCase {
         let result = try await scrapeStage.execute(InOutType.none)
         
         // Verify result
-        XCTAssertEqual(result.text, String(data: mockResponseData, encoding: .utf8))
+        XCTAssertEqual(try result.text, String(data: mockResponseData, encoding: .utf8))
         
         // Verify the request was made correctly
         XCTAssertEqual(mockClient.capturedRequests.count, 1)
@@ -226,7 +226,7 @@ final class FirecrawlMCPFlowStageTests: XCTestCase {
         let result = try await searchStage.execute(InOutType.none)
         
         // Verify result
-        XCTAssertEqual(result.text, String(data: mockResponseData, encoding: .utf8))
+        XCTAssertEqual(try result.text, String(data: mockResponseData, encoding: .utf8))
     }
     
     func testErrorHandling() async throws {
@@ -304,7 +304,7 @@ final class FirecrawlMCPFlowStageTests: XCTestCase {
         }
         
         // Execute the flow
-        try await flow.run()
+        try await flow.execute(nil)
         
         // Since LinearFlow doesn't return a value, we can only verify that no exception was thrown
         // In a real test, you might want to add a final stage that stores the result somewhere you can check

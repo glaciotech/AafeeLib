@@ -63,7 +63,7 @@ public struct MCPServerFlowStage: FlowStage {
         var requestParams: [String: Any] = parameters ?? [:]
         
         // If we have input from a previous stage, try to incorporate it
-        if let input = input, let inputText = input.text {
+        if let input = input, let inputText = try? input.text {
             // Try to parse the input as JSON if it's in JSON format
             if case .JSON(let jsonString) = input {
                 if let jsonData = jsonString.data(using: .utf8),
