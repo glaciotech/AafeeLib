@@ -14,7 +14,7 @@ protocol Flow {
 
 public struct LinearFlow: FlowStage {
 
-    
+
     let stages: [any FlowStage]
 
     // Use the result builder in the initializer
@@ -22,6 +22,11 @@ public struct LinearFlow: FlowStage {
         self.stages = stages()
     }
     
+    // Use the result builder in the initializer
+    public init(@FlowBuilder _ stages: () throws -> [any FlowStage]) throws {
+        self.stages = try stages()
+    }
+
     public func execute(_ input: InOutType? = nil) async throws -> InOutType {
         return try await runWithOutput(with: input) ?? .none
     }
@@ -32,7 +37,7 @@ public struct LinearFlow: FlowStage {
     
     private func runWithOutput(with input: InOutType? = nil) async throws -> InOutType? {
         var previousOutput: InOutType? = input
-        for stage in stages {
+        for try stage in stages {
             previousOutput = try await stage.execute(previousOutput)
         }
         
@@ -41,7 +46,7 @@ public struct LinearFlow: FlowStage {
 }
 
 public struct LoopedStageFlow: FlowStage {
-    
+
     public enum ProcessInstruction {
         case stop
         case proceed(with: InOutType? = nil)

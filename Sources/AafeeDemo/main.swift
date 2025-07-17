@@ -8,6 +8,8 @@ import SwiftyPrompts
 import SwiftyPrompts_OpenAI
 import SwiftyJsonSchema
 
+import MCPHelpers
+
 // Configure the logging system
 LoggingSystem.bootstrap { label in
     var handler = StreamLogHandler.standardOutput(label: label)
@@ -51,7 +53,7 @@ struct TestFlowCommand: AsyncParsableCommand {
         
         var afterAgentValue: String = ""
 
-        let flow = LinearFlow {
+        let flow = try LinearFlow {
             fc
             agent
             StagePeekTool(stageInput: CustomBinding(get: {
@@ -215,6 +217,7 @@ struct TestToolUsingAgentCommand: AsyncParsableCommand {
 
 public struct ToolCallWrapper: FlowStage {
 
+    public var environmentStore = EnvironmentValues()
     
     var agent: FlowStage
     
@@ -227,6 +230,8 @@ public struct ToolCallWrapper: FlowStage {
 
 
 public struct KeywordSearchContainer: FlowStage {
+    
+    public var environmentStore = EnvironmentValues()
     
     var bucket = [String: String]()
     
@@ -344,7 +349,7 @@ struct TestCollabMeGatherInfo: AsyncParsableCommand {
         
 //        var history: String = ""
         
-        let agentWithHistory = HistoryProvider(wrappedStage: agent)
+        let agentWithHistory = StoredHistoryProvider(wrappedStage: agent)
         
         #warning("This should be changed out for a StopContinueAgent with tool calling capability for RAG")
         let oneShotGVIKeywordAgent = try OneShotAgentTool(model: model, prompt: """
@@ -394,7 +399,7 @@ struct TestCollabMeGatherInfo: AsyncParsableCommand {
             return .proceed(with: .string(newInput))
         }
         
-        let fullLinearFlow = LinearFlow {
+        let fullLinearFlow = try LinearFlow {
             loopedFlow
             StagePeekTool(stageInput: CustomBinding(get: {
                return loopedFlowOutput
@@ -435,6 +440,7 @@ struct TestCollabMeCreateVideoWithJ2V: AsyncParsableCommand {
 
 struct RandomClipPicker: FlowStage {
 
+    public var environmentStore = EnvironmentValues()
     
     let clips = ["https://drive.google.com/file/d/1N79_oXdsVqDkz4PEa1GDNtesLuTff_ye/view?usp=drive_link",
                  "https://drive.google.com/file/d/1wIGXbERN_D9N-6Mx7GUbOfMtjj88_gpF/view?usp=drive_link",
@@ -527,5 +533,47 @@ let config = try decoder.decode(LocalMCPServerConfig.self, from: jsonConfig.data
 //let config = LocalMCPServerConfig(name: "SwiftServerTest",
 let mcp = LocalMCProcess(config: config)
 let client = try await mcp.start()
-print(try await client.listTools())
+let tools = try await client.listTools()
+print(tools)
 
+let firstTool = tools.tools.first
+
+print("TOOL: \(firstTool!.name)")
+print(firstTool!.annotations)
+print(firstTool!.inputSchema)
+
+let schema = firstTool!.inputSchema
+let jsonEncoder = JSONEncoder()
+let encodedJSON = try jsonEncoder.encode(schema)
+print(String(data: encodedJSON, encoding: .ascii))
+let jsonSchema = try JSONDecoder().decode(JSONSchema.self, from: encodedJSON)
+print(jsonSchema)
+
+struct EchoToolInput {
+    static let exampleValue = EchoToolInput(echoText: "Echo...")
+    
+    var echoText: String = ""
+}
+
+let result = try await client.callTool(name: "echo", arguments: ["echoText": "Hello World from MCP Client"])
+print(result.content)
+
+
+let toolMan = ToolManager(tools: [.init(name: "swift-mcp-server-example", executablePath: "/Users/peterliddle/Library/Developer/Xcode/DerivedData/SwiftMCPServerExample-evrhsjumswrkvyfjqxkqjvqvffat/Build/Products/Debug/SwiftMCPServerExample")])
+try await toolMan.loadAvailbleTools()
+print("TOOLS IN MAN: \(toolMan.availableTools)")
+
+
+let agent = try GenericToolCapableAgent(model: "gpt4o", prompt: "I want you to echo the following text `Hello Echo, Echo, Echo`", toolManager: toolMan)
+
+let toolFlow = try LinearFlow {
+    agent
+}
+
+try await toolFlow.execute(.string("Echo the following text 'Hello World Again!!!' "))
+
+// "swift-mcp-server-example": {
+//   "command": "/Users/peterliddle/Library/Developer/Xcode/DerivedData/SwiftMCPServerExample-evrhsjumswrkvyfjqxkqjvqvffat/Build/Products/Debug/SwiftMCPServerExample",
+//   "args": [],
+//   "env": {}
+// },

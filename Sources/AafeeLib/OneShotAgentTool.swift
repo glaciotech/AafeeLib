@@ -57,10 +57,12 @@ public protocol FlowStage {
     func execute(_ input: InOutType?) async throws -> InOutType
 }
 
-enum AgentToolError: Error {
-    case noAPIKey
-    case noValidInput
+public struct LLMModelConfig {
+    var apiKey: String
+    var name: String
+    var provider: String
 }
+
 
 public struct StructuredOutputOneShotAgentTool<O>: FlowStage where O: ProducesJSONSchema {
     
@@ -107,7 +109,9 @@ public struct StructuredOutputOneShotAgentTool<O>: FlowStage where O: ProducesJS
     }
 }
 
-public struct OneShotAgentTool: FlowStage {
+public struct OneShotAgentTool: FlowStage, PreSendInterception, PostSendInterception {
+    
+    public var environmentStore = EnvironmentValues()
     
     public static let AGENT_API_KEY = "AGENT_API_KEY"
     
@@ -115,12 +119,14 @@ public struct OneShotAgentTool: FlowStage {
     public var model: String
     public var prompt: PromptTemplate
     
-    public var preSendMessageModifier: (([Message]) -> [Message]) = { return $0 }
-    public var postSendMessageModifier: (([Message]) -> [Message]) = { return $0 }
+    public var preSendMessageModifier: ([Message], [Message]) -> [Message]
+    public var postSendOutputModifier: (String) -> String
+//    public var preSendMessageModifier: (([Message]) -> [Message]) = { return $0 }
+//    public var postSendMessageModifier: (([Message]) -> [Message]) = { return $0 }
     
     public init(apiKey: String? = nil, model: String, prompt: PromptTemplate,
-                preSendMessageModifier: @escaping ([Message]) -> [Message] = { return $0 },
-                postSendMessageModifier: @escaping ([Message]) -> [Message] = { return $0 } ) throws {
+                preSendMessageModifier: @escaping ([Message], [Message]) -> [Message] = { return $0 + $1 },
+                postSendOutputModifier: @escaping (String) -> String = { return $0 } ) throws {
         
         guard let apiKey = apiKey ?? UserDefaults.standard.string(forKey: Self.AGENT_API_KEY) else {
             throw AgentToolError.noAPIKey
@@ -130,7 +136,7 @@ public struct OneShotAgentTool: FlowStage {
         self.model = model
         self.prompt = prompt
         self.preSendMessageModifier = preSendMessageModifier
-        self.postSendMessageModifier = postSendMessageModifier
+        self.postSendOutputModifier = postSendOutputModifier
     }
     
     public func execute(_ input: InOutType?) async throws -> InOutType {
@@ -145,10 +151,11 @@ public struct OneShotAgentTool: FlowStage {
         logger.debug("Agent Tool running with \(input)")
         
         let msgs: [Message] = [.system(.text(prompt.text)), .user(.text(inputTextRep))]
-        let msgsToSend = preSendMessageModifier(msgs)
+        let msgsToSend = preSendMessageModifier([], msgs)
         let output = try await runner.run(with: msgsToSend, on: llm)
+        let modifiedOutput = postSendOutputModifier(output.output)
         
-        return .string(output.output)
+        return .string(modifiedOutput)
     }
 }
 

@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version:5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -21,9 +21,9 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         
         .package(url: "https://github.com/modelcontextprotocol/swift-sdk.git", from: "0.9.0"),
-        .package(url: "https://github.com/ptliddle/swifty-prompts.git", branch: "main"),
+//        .package(url: "https://github.com/ptliddle/swifty-prompts.git", branch: "main"),
 //        .package(url: "https://github.com/ptliddle/swifty-prompts.git", from: "0.1.0"),
-//        .package(path: "../../Libraries/SwiftyPrompts"),
+        .package(path: "../../Libraries/SwiftyPrompts"),
 
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.3"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.3"),
@@ -31,6 +31,8 @@ let package = Package(
 //        .package(path: "../../Libraries/SwiftyFirecrawl"),
         .package(url: "https://github.com/glaciotech/SwiftFirecrawl", from: "0.1.0"),
 //        .package(path: "../../Libraries/SwiftyJsonSchema")
+        
+        .package(path: "../../Libraries/mcp-swift-sdk-helpers")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -39,10 +41,14 @@ let package = Package(
             name: "AafeeLib",
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
-                .product(name: "SwiftyPrompts", package: "swifty-prompts"), // "SwiftyPrompts"),
-                .product(name: "SwiftyPrompts.OpenAI", package: "swifty-prompts"), // "SwiftyPrompts"), //
+//                .product(name: "SwiftyPrompts", package: "swifty-prompts"),
+                .product(name: "SwiftyPrompts", package: "SwiftyPrompts"),
+//                .product(name: "SwiftyPrompts.OpenAI", package: "swifty-prompts"),
+                .product(name: "SwiftyPrompts.OpenAI", package: "SwiftyPrompts"),
                 .product(name: "SwiftFirecrawl", package: "SwiftFirecrawl"),
-                .product(name: "MCP", package: "swift-sdk")
+                .product(name: "MCP", package: "swift-sdk"),
+                .product(name: "MCPHelpers", package: "mcp-swift-sdk-helpers")
+                
 //                .product(name: "SwiftyJsonSchema", package: "swifty-json-schema"),
                
             ]),
