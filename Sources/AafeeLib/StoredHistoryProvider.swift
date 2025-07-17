@@ -10,8 +10,6 @@ import Logging
 
 public class StoredHistoryProvider<F>: FlowStage where F: FlowStage, F: PreSendInterception, F: PostSendInterception {
 
-    public var environmentStore = EnvironmentValues()
- 
     var wrappedStage: F
     
     private var msgHistory = [Message]()

@@ -56,18 +56,5 @@ final class AafeeLibTests: XCTestCase {
         
         print(schemas)
     }
-    
-    
-    func testFlowStageHasInjectedEnvironmentValue() async throws {
-        
-        ProcessInfo.processInfo.environment[OneShotAgentTool.AGENT_API_KEY] = "TestKey"
-        let agent = try OneShotAgentTool(model: "gpt4o", prompt: "")
-        
-        
-    }
-    
-    func testFlowStagePicksUpEnvironmentValueFromProcessEnvironment() async throws {
-        
-    }
 }
 

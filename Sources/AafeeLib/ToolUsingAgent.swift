@@ -152,8 +152,6 @@ public class ToolManager {
 /// for more advanced and consistent calling use the advanced version which uses LLMs specific tool calling capability
 public struct GenericToolCapableAgent: FlowStage {
     
-    public var environmentStore = EnvironmentValues()
-    
     let outputActionSchema = """
     {
       "type": "object",

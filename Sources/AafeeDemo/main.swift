@@ -216,8 +216,6 @@ struct TestToolUsingAgentCommand: AsyncParsableCommand {
 }
 
 public struct ToolCallWrapper: FlowStage {
-
-    public var environmentStore = EnvironmentValues()
     
     var agent: FlowStage
     
@@ -230,8 +228,6 @@ public struct ToolCallWrapper: FlowStage {
 
 
 public struct KeywordSearchContainer: FlowStage {
-    
-    public var environmentStore = EnvironmentValues()
     
     var bucket = [String: String]()
     
@@ -439,8 +435,6 @@ struct TestCollabMeCreateVideoWithJ2V: AsyncParsableCommand {
 }
 
 struct RandomClipPicker: FlowStage {
-
-    public var environmentStore = EnvironmentValues()
     
     let clips = ["https://drive.google.com/file/d/1N79_oXdsVqDkz4PEa1GDNtesLuTff_ye/view?usp=drive_link",
                  "https://drive.google.com/file/d/1wIGXbERN_D9N-6Mx7GUbOfMtjj88_gpF/view?usp=drive_link",

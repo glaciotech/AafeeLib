@@ -111,8 +111,6 @@ public struct StructuredOutputOneShotAgentTool<O>: FlowStage where O: ProducesJS
 
 public struct OneShotAgentTool: FlowStage, PreSendInterception, PostSendInterception {
     
-    public var environmentStore = EnvironmentValues()
-    
     public static let AGENT_API_KEY = "AGENT_API_KEY"
     
     public var apiKey: String
