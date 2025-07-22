@@ -35,7 +35,6 @@ public enum InOutType {
     case instruction(InstructionOutput)
     case structured(Codable.Type, Codable)
     case array([String])
-    case vector([Double])
     
     public var text: String {
         get throws {
@@ -108,57 +107,6 @@ public struct StructuredOutputOneShotAgentTool<O>: FlowStage where O: ProducesJS
         let output = try await runner.run(with: msgsToSend, on: llm)
         
         return .structured(O.self, output.output)
-    }
-}
-
-public struct EmbedAgentTool: FlowStage, PreSendInterception, PostSendInterception {
-     
-    public static let AGENT_API_KEY = "AGENT_API_KEY"
-
-    public let serviceFactory: LLMServiceFactory
-    public var prompt: PromptTemplate
-    
-    public var preSendMessageModifier: ([Message], [Message]) -> [Message]
-    public var postSendOutputModifier: (String) -> String
-    
-    var apiKey: String
-    
-    
-    public init(apiKey: String? = nil,
-                serviceFactory: LLMServiceFactory,
-                prompt: PromptTemplate,
-                preSendMessageModifier: @escaping ([Message], [Message]) -> [Message] = { return $0 + $1 },
-                postSendOutputModifier: @escaping (String) -> String = { return $0 } ) throws {
-        
-        guard let apiKey = apiKey ?? UserDefaults.standard.string(forKey: Self.AGENT_API_KEY) else {
-            throw AgentToolError.noAPIKey
-        }
-        
-        self.apiKey = apiKey
-        self.serviceFactory = serviceFactory
-        
-        self.prompt = prompt
-        self.preSendMessageModifier = preSendMessageModifier
-        self.postSendOutputModifier = postSendOutputModifier
-    }
-    
-    public func execute(_ input: InOutType?) async throws -> InOutType {
-        let runner = SwiftyPrompts.BasicPromptRunner(apiType: .standard)
-        
-        let llm = serviceFactory.create() // OpenAILLM(apiKey: self.apiKey)
-        
-        guard let input = input, let inputTextRep = try? input.text else {
-            throw AgentToolError.noValidInput
-        }
-        
-        logger.debug("Embed agent tool running with \(input)")
-        
-        let msgs: [Message] = [.system(.text(prompt.text)), .user(.text(inputTextRep))]
-        let msgsToSend = preSendMessageModifier([], msgs)
-        let output = try await runner.run(with: msgsToSend, on: llm)
-        let modifiedOutput = postSendOutputModifier(output.output)
-        
-        return .vector([Double])
     }
 }
 

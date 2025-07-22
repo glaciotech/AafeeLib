@@ -4,28 +4,6 @@ import SwiftyJsonSchema
 
 final class AafeeLibTests: XCTestCase {
 
-    func testOutputActionDecoding() async throws {
-        
-        let jsonFragment = """
-            {
-              "useTool": {
-                "_0": {
-                  "serverName": "SwiftMCPServerExample",
-                  "toolName": "echo"
-                },
-                "_1": {}
-              }
-            }
-            """
-        
-        let decoded = try JSONDecoder().decode(GenericToolCapableAgent.OutputAction.self, from: jsonFragment.data(using: .ascii)!)
-        print(decoded)
-    }
-    
-    func testOutputActionSchemaGeneration() async throws {
-        let schemas = JsonSchemaCreator.createJSONSchema(from: GenericToolCapableAgent.OutputAction.self)
-        print(schemas)
-    }
     
     func testBasicStringEnumSchemaGeneration() async throws {
         
@@ -48,12 +26,6 @@ final class AafeeLibTests: XCTestCase {
         }
         
         let schemas = try JSONSchemaGenerator().generateSchema(from: TestEnumAsInt.self)
-        print(schemas)
-    }
-    
-    func testOutputActionSchemaGenerationWithNewBuilder() async throws {
-        let schemas = try JSONSchemaGenerator().generateSchema(from: GenericToolCapableAgent.OutputAction.self)
-        
         print(schemas)
     }
 }
