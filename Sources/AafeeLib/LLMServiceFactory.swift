@@ -9,8 +9,11 @@ import OpenAIKit
 import SwiftAnthropic
 import SwiftyPrompts
 import SwiftyPrompts_OpenAI
-import SwiftyPrompts_Anthropic
 import SwiftyPrompts_xAI
+
+#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(tvOS)
+import SwiftyPrompts_Anthropic
+#endif
 
 enum LLMServiceFactoryError: Error {
     case unknownProvider
@@ -46,8 +49,10 @@ public class LLMServiceFactory {
             default:
                 throw LLMServiceFactoryError.unknownModel(model)
             }
+#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(tvOS)
         case "anthropic":
             llmModel = .anthropic(SwiftAnthropic.Model.other(model))
+#endif
         case "xai":
             guard let xAIModel = xAIModel.init(rawValue: model) else {
                 throw LLMServiceFactoryError.unknownModel(model)
@@ -60,8 +65,10 @@ public class LLMServiceFactory {
     
     func create() -> LLM {
         switch llmModel {
+#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(tvOS)
         case .anthropic(let model):
             return AnthropicLLM(apiKey: apiKey, model: model)
+#endif
         case .openai(let modelID):
             return OpenAILLM(apiKey: apiKey, model: modelID)
         case .xai(let xaiModel):

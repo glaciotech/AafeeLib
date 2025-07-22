@@ -1,4 +1,4 @@
-// swift-tools-version:5.9
+// swift-tools-version:6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -46,7 +46,7 @@ let package = Package(
 //                .product(name: "SwiftyPrompts", package: "SwiftyPrompts"),
                 .product(name: "SwiftyPrompts.OpenAI", package: "swifty-prompts"),
 //                .product(name: "SwiftyPrompts.OpenAI", package: "SwiftyPrompts"),
-                .product(name: "SwiftyPrompts.Anthropic", package: "swifty-prompts"),
+                .product(name: "SwiftyPrompts.Anthropic", package: "swifty-prompts", condition: .when(platforms: [.macOS, .iOS, .tvOS, .watchOS, .visionOS])),
 //                .product(name: "SwiftyPrompts.Anthropic", package: "SwiftyPrompts"),
               .product(name: "SwiftyPrompts.xAI", package: "swifty-prompts"),
 //                .product(name: "SwiftyPrompts.xAI", package: "SwiftyPrompts"),
