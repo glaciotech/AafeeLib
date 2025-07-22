@@ -65,9 +65,11 @@ public struct WriteToFileTool: FlowStage {
             case .JSON(let string), .md(let string), .string(let string):
                     return string
             case .none:
-                return nil
+                return ""
             case .instruction(let output):
                 return output.text
+            case .vector(let vector):
+                return String(vector.map({ "\($0)" }).joined(separator: ","))
             case .structured(_, _), .array(_):
                 fatalError("Not supported by this FileWriterTool use one that supports structured content")
             }
@@ -165,6 +167,8 @@ public struct CodeBlockExtractorTool: FlowStage {
             case .structured(_, _):
                 return nil
             case .array(_):
+                return nil
+            case .vector(_):
                 return nil
             }
         }() else {

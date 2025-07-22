@@ -21,9 +21,9 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         
         .package(url: "https://github.com/modelcontextprotocol/swift-sdk.git", from: "0.9.0"),
-//        .package(url: "https://github.com/ptliddle/swifty-prompts.git", branch: "main"),
+        .package(url: "https://github.com/ptliddle/swifty-prompts.git", branch: "develop"),
 //        .package(url: "https://github.com/ptliddle/swifty-prompts.git", from: "0.1.0"),
-        .package(path: "../../Libraries/SwiftyPrompts"),
+//        .package(path: "../../Libraries/SwiftyPrompts"),
 
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.3"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.3"),
@@ -32,7 +32,8 @@ let package = Package(
         .package(url: "https://github.com/glaciotech/SwiftFirecrawl", from: "0.1.0"),
 //        .package(path: "../../Libraries/SwiftyJsonSchema")
         
-        .package(path: "../../Libraries/mcp-swift-sdk-helpers")
+//        .package(path: "../../Libraries/mcp-swift-sdk-helpers")
+            .package(url: "https://github.com/glaciotech/mcp-swift-sdk-helpers.git", branch: "develop"), //from: "0.2.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -41,10 +42,14 @@ let package = Package(
             name: "AafeeLib",
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
-//                .product(name: "SwiftyPrompts", package: "swifty-prompts"),
-                .product(name: "SwiftyPrompts", package: "SwiftyPrompts"),
-//                .product(name: "SwiftyPrompts.OpenAI", package: "swifty-prompts"),
-                .product(name: "SwiftyPrompts.OpenAI", package: "SwiftyPrompts"),
+                .product(name: "SwiftyPrompts", package: "swifty-prompts"),
+//                .product(name: "SwiftyPrompts", package: "SwiftyPrompts"),
+                .product(name: "SwiftyPrompts.OpenAI", package: "swifty-prompts"),
+//                .product(name: "SwiftyPrompts.OpenAI", package: "SwiftyPrompts"),
+                .product(name: "SwiftyPrompts.Anthropic", package: "swifty-prompts"),
+//                .product(name: "SwiftyPrompts.Anthropic", package: "SwiftyPrompts"),
+              .product(name: "SwiftyPrompts.xAI", package: "swifty-prompts"),
+//                .product(name: "SwiftyPrompts.xAI", package: "SwiftyPrompts"),
                 .product(name: "SwiftFirecrawl", package: "SwiftFirecrawl"),
                 .product(name: "MCP", package: "swift-sdk"),
                 .product(name: "MCPHelpers", package: "mcp-swift-sdk-helpers")

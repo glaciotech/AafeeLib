@@ -4,6 +4,7 @@ import SwiftyPrompts
 import SwiftyPrompts_OpenAI
 
 
+
 extension Message {
     var content: Content {
         switch self {

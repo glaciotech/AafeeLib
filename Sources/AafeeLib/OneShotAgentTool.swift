@@ -9,6 +9,7 @@ import Foundation
 import SwiftyPrompts
 import SwiftyPrompts_OpenAI
 import SwiftyJsonSchema
+import OpenAIKit
 
 public enum NextStep {
     case `continue`
@@ -34,6 +35,7 @@ public enum InOutType {
     case instruction(InstructionOutput)
     case structured(Codable.Type, Codable)
     case array([String])
+    case vector([Double])
     
     public var text: String {
         get throws {
@@ -109,18 +111,66 @@ public struct StructuredOutputOneShotAgentTool<O>: FlowStage where O: ProducesJS
     }
 }
 
-public struct OneShotAgentTool: FlowStage, PreSendInterception, PostSendInterception {
-    
+public struct EmbedAgentTool: FlowStage, PreSendInterception, PostSendInterception {
+     
     public static let AGENT_API_KEY = "AGENT_API_KEY"
-    
-    public var apiKey: String
-    public var model: String
+
+    public let serviceFactory: LLMServiceFactory
     public var prompt: PromptTemplate
     
     public var preSendMessageModifier: ([Message], [Message]) -> [Message]
     public var postSendOutputModifier: (String) -> String
-//    public var preSendMessageModifier: (([Message]) -> [Message]) = { return $0 }
-//    public var postSendMessageModifier: (([Message]) -> [Message]) = { return $0 }
+    
+    var apiKey: String
+    
+    
+    public init(apiKey: String? = nil,
+                serviceFactory: LLMServiceFactory,
+                prompt: PromptTemplate,
+                preSendMessageModifier: @escaping ([Message], [Message]) -> [Message] = { return $0 + $1 },
+                postSendOutputModifier: @escaping (String) -> String = { return $0 } ) throws {
+        
+        guard let apiKey = apiKey ?? UserDefaults.standard.string(forKey: Self.AGENT_API_KEY) else {
+            throw AgentToolError.noAPIKey
+        }
+        
+        self.apiKey = apiKey
+        self.serviceFactory = serviceFactory
+        
+        self.prompt = prompt
+        self.preSendMessageModifier = preSendMessageModifier
+        self.postSendOutputModifier = postSendOutputModifier
+    }
+    
+    public func execute(_ input: InOutType?) async throws -> InOutType {
+        let runner = SwiftyPrompts.BasicPromptRunner(apiType: .standard)
+        
+        let llm = serviceFactory.create() // OpenAILLM(apiKey: self.apiKey)
+        
+        guard let input = input, let inputTextRep = try? input.text else {
+            throw AgentToolError.noValidInput
+        }
+        
+        logger.debug("Embed agent tool running with \(input)")
+        
+        let msgs: [Message] = [.system(.text(prompt.text)), .user(.text(inputTextRep))]
+        let msgsToSend = preSendMessageModifier([], msgs)
+        let output = try await runner.run(with: msgsToSend, on: llm)
+        let modifiedOutput = postSendOutputModifier(output.output)
+        
+        return .vector([Double])
+    }
+}
+
+public struct OneShotAgentTool: FlowStage, PreSendInterception, PostSendInterception {
+    
+    public static let AGENT_API_KEY = "AGENT_API_KEY"
+    
+    public let serviceFactory: LLMServiceFactory
+    public var prompt: PromptTemplate
+    
+    public var preSendMessageModifier: ([Message], [Message]) -> [Message]
+    public var postSendOutputModifier: (String) -> String
     
     public init(apiKey: String? = nil, model: String, prompt: PromptTemplate,
                 preSendMessageModifier: @escaping ([Message], [Message]) -> [Message] = { return $0 + $1 },
@@ -129,18 +179,18 @@ public struct OneShotAgentTool: FlowStage, PreSendInterception, PostSendIntercep
         guard let apiKey = apiKey ?? UserDefaults.standard.string(forKey: Self.AGENT_API_KEY) else {
             throw AgentToolError.noAPIKey
         }
+        
+        serviceFactory = try LLMServiceFactory(apiKey: apiKey, model: .openai(OpenAIKit.Model.GPT4.gpt4oLatest))
  
-        self.apiKey = apiKey
-        self.model = model
         self.prompt = prompt
         self.preSendMessageModifier = preSendMessageModifier
         self.postSendOutputModifier = postSendOutputModifier
     }
     
     public func execute(_ input: InOutType?) async throws -> InOutType {
-        let runner = SwiftyPrompts.BasicPromptRunner()
+        let runner = SwiftyPrompts.BasicPromptRunner(apiType: .standard)
         
-        let llm = OpenAILLM(apiKey: self.apiKey)
+        let llm = serviceFactory.create() // OpenAILLM(apiKey: self.apiKey)
         
         guard let input = input, let inputTextRep = try? input.text else {
             throw AgentToolError.noValidInput
@@ -176,8 +226,6 @@ public class MessageHistoryProvider: PreSendMessageModifier {
         modifiedMsgs.append(contentsOf: input)
         return modifiedMsgs
     }
-    
-    
 }
 
 public protocol PreSendInterception {
