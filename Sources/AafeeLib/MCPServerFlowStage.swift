@@ -7,6 +7,10 @@
 
 import Foundation
 
+#if os(Linux)
+import FoundationNetworking
+#endif
+
 /// Errors that can occur when using the MCPServerFlowStage
 public enum MCPServerError: Error {
     case invalidServerName

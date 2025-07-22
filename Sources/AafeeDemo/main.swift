@@ -17,6 +17,8 @@ LoggingSystem.bootstrap { label in
     return handler
 }
 
+
+#if !os(Linux)
 // Define the root command
 @available(macOS 10.15, macCatalyst 13, iOS 13, tvOS 13, watchOS 6, *)
 struct AafeeCommand: AsyncParsableCommand {
@@ -27,9 +29,6 @@ struct AafeeCommand: AsyncParsableCommand {
         defaultSubcommand: TestFlowCommand.self
     )
 }
-
-
-
 
 @available(macOS 10.15, macCatalyst 13, iOS 13, tvOS 13, watchOS 6, *)
 struct TestFlowCommand: AsyncParsableCommand {
@@ -71,6 +70,7 @@ struct TestFlowCommand: AsyncParsableCommand {
         print("PEEKED : \(afterAgentValue)")
     }
 }
+#endif
 
 struct TestMultiStepCommand: AsyncParsableCommand {
     
@@ -509,7 +509,7 @@ struct RandomClipPicker: FlowStage {
 
 //try await TestCollabMeGatherInfo().run()
 
-
+#if !os(Linux)
 // Test MCP
 
 let jsonConfig = """
@@ -530,6 +530,7 @@ let client = try await mcp.start()
 let tools = try await client.listTools()
 print(tools)
 
+
 let firstTool = tools.tools.first
 
 print("TOOL: \(firstTool!.name)")
@@ -542,6 +543,7 @@ let encodedJSON = try jsonEncoder.encode(schema)
 print(String(data: encodedJSON, encoding: .ascii))
 let jsonSchema = try JSONDecoder().decode(JSONSchema.self, from: encodedJSON)
 print(jsonSchema)
+
 
 struct EchoToolInput {
     static let exampleValue = EchoToolInput(echoText: "Echo...")
@@ -565,6 +567,7 @@ let toolFlow = try LinearFlow {
 }
 
 try await toolFlow.execute(.string("Echo the following text 'Hello World Again!!!' "))
+#endif
 
 // "swift-mcp-server-example": {
 //   "command": "/Users/peterliddle/Library/Developer/Xcode/DerivedData/SwiftMCPServerExample-evrhsjumswrkvyfjqxkqjvqvffat/Build/Products/Debug/SwiftMCPServerExample",

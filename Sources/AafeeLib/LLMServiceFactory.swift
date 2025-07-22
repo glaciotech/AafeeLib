@@ -65,9 +65,12 @@ public class LLMServiceFactory {
     
     func create() -> LLM {
         switch llmModel {
-#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(tvOS)
+#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(visionOS)
         case .anthropic(let model):
             return AnthropicLLM(apiKey: apiKey, model: model)
+#else
+        case .anthropic(_):
+            fatalError("Anthropic is not supported on this platform")
 #endif
         case .openai(let modelID):
             return OpenAILLM(apiKey: apiKey, model: modelID)

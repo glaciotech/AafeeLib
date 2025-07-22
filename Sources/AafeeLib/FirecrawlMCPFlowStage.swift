@@ -5,7 +5,10 @@
 //  Created by Cascade on 5/15/25.
 //
 
+#if !os(Linux) // Not currently supported on Linux
+
 import Foundation
+
 
 /// A specialized FlowStage for interacting with the Firecrawl MCP server
 public struct FirecrawlMCPFlowStage: FlowStage {
@@ -140,3 +143,5 @@ public extension LinearFlow {
         }
     }
 }
+
+#endif

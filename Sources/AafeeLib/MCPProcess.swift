@@ -7,7 +7,12 @@
 import Foundation
 import Logging
 import MCP
+
+#if canImport(System)
 import System
+#else
+import SystemPackage
+#endif
 
 extension Process {
     var terminalCommand: String {
@@ -109,8 +114,8 @@ class MCPProcess {
     
     deinit {
         // Kill process if app is killed
-        log.debug("Killing process \(self.wrappedProcess.processIdentifier)")
-        if self.wrappedProcess.isRunning ?? false {
+        log.debug("Killing process \(String(describing: self.wrappedProcess.processIdentifier))")
+        if self.wrappedProcess.isRunning {
             self.wrappedProcess.terminate()
         }
     }
