@@ -21,7 +21,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         
 //        .package(url: "https://github.com/ptliddle/swifty-prompts.git", branch: "main"),
-        .package(url: "https://github.com/ptliddle/swifty-prompts.git", from: "0.1.2"),
+        .package(url: "https://github.com/ptliddle/swifty-prompts.git", from: "0.1.3"),
 //        .package(path: "../../Libraries/SwiftyPrompts"),
 
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.3"),
