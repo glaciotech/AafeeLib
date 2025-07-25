@@ -8,4 +8,5 @@
 enum AgentToolError: Error {
     case noAPIKey
     case noValidInput
+    case noVaporClient
 }

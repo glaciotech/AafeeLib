@@ -7,7 +7,10 @@
 
 import Foundation
 import SwiftyPrompts
+
 import SwiftyPrompts_OpenAI
+import SwiftyPrompts_Anthropic
+
 import SwiftyJsonSchema
 import RegexBuilder
 

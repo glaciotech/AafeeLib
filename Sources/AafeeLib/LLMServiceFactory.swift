@@ -9,31 +9,63 @@ import OpenAIKit
 import SwiftAnthropic
 import SwiftyPrompts
 import SwiftyPrompts_OpenAI
+import SwiftyPrompts_Anthropic
 import SwiftyPrompts_xAI
 
-#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(tvOS)
-import SwiftyPrompts_Anthropic
-#endif
 
 enum LLMServiceFactoryError: Error {
     case unknownProvider
     case unknownModel(String)
 }
 
-public class LLMServiceFactory {
+public typealias OpenAIModel = String
+
+extension OpenAIModel: OpenAIKit.ModelID {
+    public var id: String {
+        return self
+    }
+    
+    public init(_ from: OpenAIKit.ModelID) {
+        self = from.id
+    }
+    
+    public init(_ raw: String) {
+        self = raw
+    }
+}
+
+open class LLMServiceFactory {
     
     public enum AnyProviderModel {
         case anthropic(SwiftAnthropic.Model)
-        case openai(OpenAIKit.ModelID)
+        case openai(OpenAIModel)
         case xai(xAIModel)
     }
     
-    private var apiKey: String
-    private var llmModel: AnyProviderModel
+    public var apiKey: String
+    public var llmModel: AnyProviderModel
     
     public init(apiKey: String, model: AnyProviderModel) throws {
         self.apiKey = apiKey
         self.llmModel = model
+    }
+    
+    private static func openAIValidate(model: String) -> OpenAIKit.ModelID? {
+        
+        if let model = Model.GPT4(rawValue: model) {
+            return model
+        }
+        else if let model = Model.GPT3(rawValue: model) {
+            return model
+        }
+        else if let model = Model.Codex(rawValue: model) {
+            return model
+        }
+        else if let model = Model.Whisper(rawValue: model) {
+            return model
+        }
+        
+        return nil
     }
     
     public init(apiKey: String, provider: String, model: String) throws {
@@ -41,18 +73,15 @@ public class LLMServiceFactory {
         
         switch provider.lowercased() {
         case "openai":
-            switch model.lowercased()[model.startIndex..<model.index(model.startIndex, offsetBy: 3)] {
-            case "gpt4":
-                llmModel = .openai(OpenAIKit.Model.GPT4(rawValue: model) ?? Model.GPT4.gpt4o)
-            case "gpt3":
-                llmModel = .openai(OpenAIKit.Model.GPT3(rawValue: model) ?? Model.GPT3.gpt3_5Turbo16K)
-            default:
-                throw LLMServiceFactoryError.unknownModel(model)
+            
+            if Self.openAIValidate(model: model) == nil {
+                logger.warning("The model \(model) is not a known model this may cause errors calling OpenAI API. Check it is a valid model with OpenAI, it could be a newer model then the SDK is aware of")
             }
-#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(tvOS)
+            
+            llmModel = .openai(model)
+
         case "anthropic":
             llmModel = .anthropic(SwiftAnthropic.Model.other(model))
-#endif
         case "xai":
             guard let xAIModel = xAIModel.init(rawValue: model) else {
                 throw LLMServiceFactoryError.unknownModel(model)
@@ -63,15 +92,10 @@ public class LLMServiceFactory {
         }
     }
     
-    func create() -> LLM {
+    open func create() -> LLM {
         switch llmModel {
-#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(visionOS)
         case .anthropic(let model):
             return AnthropicLLM(apiKey: apiKey, model: model)
-#else
-        case .anthropic(_):
-            fatalError("Anthropic is not supported on this platform")
-#endif
         case .openai(let modelID):
             return OpenAILLM(apiKey: apiKey, model: modelID)
         case .xai(let xaiModel):

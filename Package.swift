@@ -13,6 +13,9 @@ let package = Package(
         .library(
             name: "AafeeLib",
             targets: ["AafeeLib"]),
+        .library(
+            name: "AafeeLib.Vapor",
+            targets: ["AafeeLib", "AafeeLib.Vapor"]),
         .executable(
             name: "AafeeDemo",
             targets: ["AafeeDemo"])
@@ -49,10 +52,12 @@ let package = Package(
 //                .product(name: "SwiftyPrompts", package: "SwiftyPrompts"),
                 .product(name: "SwiftyPrompts.OpenAI", package: "swifty-prompts"),
 //                .product(name: "SwiftyPrompts.OpenAI", package: "SwiftyPrompts"),
-                .product(name: "SwiftyPrompts.Anthropic", package: "swifty-prompts", condition: .when(platforms: [.macOS, .iOS, .tvOS, .watchOS, .visionOS])),
+                .product(name: "SwiftyPrompts.Anthropic", package: "swifty-prompts"), //, condition: .when(platforms: [.macOS, .iOS, .tvOS, .watchOS, .visionOS])),
 //                .product(name: "SwiftyPrompts.Anthropic", package: "SwiftyPrompts"),
               .product(name: "SwiftyPrompts.xAI", package: "swifty-prompts"),
 //                .product(name: "SwiftyPrompts.xAI", package: "SwiftyPrompts"),
+                .product(name: "SwiftyPrompts.VaporSupport", package: "swifty-prompts"),
+//                  .product(name: "SwiftyPrompts.VaporSupport", package: "SwiftyPrompts"),
                 .product(name: "SwiftFirecrawl", package: "SwiftFirecrawl", condition: .when(platforms: [.macCatalyst, .macOS, .iOS, .watchOS, .visionOS])),
                 .product(name: "MCP", package: "swift-sdk"),
                 .product(name: "MCPHelpers", package: "mcp-swift-sdk-helpers"),
@@ -61,6 +66,13 @@ let package = Package(
 //                .product(name: "SwiftyJsonSchema", package: "swifty-json-schema"),
                
             ]),
+        .target(
+            name: "AafeeLib.Vapor",
+            dependencies: [
+                "AafeeLib",
+            ],
+            path: "Sources/VaporSupport"
+        ),
         .executableTarget(
             name: "AafeeDemo",
             dependencies: [

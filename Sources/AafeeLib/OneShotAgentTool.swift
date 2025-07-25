@@ -7,9 +7,15 @@
 
 import Foundation
 import SwiftyPrompts
+
 import SwiftyPrompts_OpenAI
+import SwiftyPrompts_Anthropic
+
 import SwiftyJsonSchema
 import OpenAIKit
+
+import Vapor
+import SwiftyPrompts_VaporSupport
 
 public enum NextStep {
     case `continue`
@@ -120,6 +126,18 @@ public struct OneShotAgentTool: FlowStage, PreSendInterception, PostSendIntercep
     public var preSendMessageModifier: ([Message], [Message]) -> [Message]
     public var postSendOutputModifier: (String) -> String
     
+    public init(serviceFactory: LLMServiceFactory,
+                prompt: PromptTemplate,
+                preSendMessageModifier: @escaping ([Message], [Message]) -> [Message] = { return $0 + $1 },
+                postSendOutputModifier: @escaping (String) -> String = { return $0 } ) throws {
+        
+        self.serviceFactory = serviceFactory
+        
+        self.prompt = prompt
+        self.preSendMessageModifier = preSendMessageModifier
+        self.postSendOutputModifier = postSendOutputModifier
+    }
+    
     public init(apiKey: String? = nil, model: String, prompt: PromptTemplate,
                 preSendMessageModifier: @escaping ([Message], [Message]) -> [Message] = { return $0 + $1 },
                 postSendOutputModifier: @escaping (String) -> String = { return $0 } ) throws {
@@ -128,8 +146,8 @@ public struct OneShotAgentTool: FlowStage, PreSendInterception, PostSendIntercep
             throw AgentToolError.noAPIKey
         }
         
-        serviceFactory = try LLMServiceFactory(apiKey: apiKey, model: .openai(OpenAIKit.Model.GPT4.gpt4oLatest))
- 
+        self.serviceFactory = try LLMServiceFactory(apiKey: apiKey, model: .openai(.init(OpenAIKit.Model.GPT4.gpt4oLatest)))
+        
         self.prompt = prompt
         self.preSendMessageModifier = preSendMessageModifier
         self.postSendOutputModifier = postSendOutputModifier
