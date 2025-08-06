@@ -23,8 +23,7 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         
-        .package(url: "https://github.com/modelcontextprotocol/swift-sdk.git", from: "0.9.0"),
-        .package(url: "https://github.com/ptliddle/swifty-prompts.git", branch: "develop"),
+        .package(url: "https://github.com/ptliddle/swifty-prompts.git", from: "0.2.0"),
 //        .package(url: "https://github.com/ptliddle/swifty-prompts.git", from: "0.1.0"),
 //       .package(path: "../swifty-prompts"), // Linux
 //        .package(path: "../../Libraries/SwiftyPrompts"),
@@ -35,8 +34,8 @@ let package = Package(
         .package(url: "https://github.com/glaciotech/SwiftFirecrawl", from: "0.1.0"),
 //        .package(path: "../../Libraries/SwiftyJsonSchema")
         
-//        .package(path: "../../Libraries/mcp-swift-sdk-helpers")
-            .package(url: "https://github.com/glaciotech/mcp-swift-sdk-helpers.git", branch: "develop"), //from: "0.2.0")
+//        .package(path: "../../Libraries/mcp-swift-sdk-helpers"),
+        .package(url: "https://github.com/glaciotech/mcp-swift-sdk-helpers.git", exact: "0.2.1"), // This also imports swift MCP
             
         // Add SystemPackage for FileDescriptor support on Linux
         .package(url: "https://github.com/apple/swift-system.git", from: "1.0.0")
@@ -59,7 +58,6 @@ let package = Package(
                 .product(name: "SwiftyPrompts.VaporSupport", package: "swifty-prompts"),
 //                  .product(name: "SwiftyPrompts.VaporSupport", package: "SwiftyPrompts"),
                 .product(name: "SwiftFirecrawl", package: "SwiftFirecrawl", condition: .when(platforms: [.macCatalyst, .macOS, .iOS, .watchOS, .visionOS])),
-                .product(name: "MCP", package: "swift-sdk"),
                 .product(name: "MCPHelpers", package: "mcp-swift-sdk-helpers"),
                 .product(name: "SystemPackage", package: "swift-system")
                 
@@ -79,7 +77,6 @@ let package = Package(
                 "AafeeLib",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "Logging", package: "swift-log"),
-                .product(name: "MCP", package: "swift-sdk")
             ]),
         .testTarget(
             name: "AafeeLibTests",
