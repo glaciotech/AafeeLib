@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version:6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -13,20 +13,33 @@ let package = Package(
         .library(
             name: "AafeeLib",
             targets: ["AafeeLib"]),
+        .library(
+            name: "AafeeLib.Vapor",
+            targets: ["AafeeLib", "AafeeLib.Vapor"]),
         .executable(
             name: "AafeeDemo",
             targets: ["AafeeDemo"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-//        .package(url: "https://github.com/ptliddle/swifty-prompts.git", branch: "main"),
+        
+        .package(url: "https://github.com/modelcontextprotocol/swift-sdk.git", from: "0.9.0"),
+        .package(url: "https://github.com/ptliddle/swifty-prompts.git", branch: "develop"),
+//        .package(url: "https://github.com/ptliddle/swifty-prompts.git", from: "0.1.0"),
+//       .package(path: "../swifty-prompts"), // Linux
 //        .package(path: "../../Libraries/SwiftyPrompts"),
-            .package(url: "https://github.com/ptliddle/swifty-prompts.git", branch: "main"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.3"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.3"),
-//        .package(url: "https://github.com/ptliddle/swifty-json-schema.git", branch: "main"), // Adjust URL and version as needed
+//        .package(url: "https://github.com/ptliddle/swifty-json-schema.git", from: "0.1.0"), // Adjust URL and version as needed
 //        .package(path: "../../Libraries/SwiftyFirecrawl"),
-        .package(url: "https://github.com/glaciotech/SwiftFirecrawl", branch: "main")
+        .package(url: "https://github.com/glaciotech/SwiftFirecrawl", from: "0.1.0"),
+//        .package(path: "../../Libraries/SwiftyJsonSchema")
+        
+//        .package(path: "../../Libraries/mcp-swift-sdk-helpers")
+            .package(url: "https://github.com/glaciotech/mcp-swift-sdk-helpers.git", branch: "develop"), //from: "0.2.0")
+            
+        // Add SystemPackage for FileDescriptor support on Linux
+        .package(url: "https://github.com/apple/swift-system.git", from: "1.0.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -36,15 +49,37 @@ let package = Package(
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "SwiftyPrompts", package: "swifty-prompts"),
+//                .product(name: "SwiftyPrompts", package: "SwiftyPrompts"),
                 .product(name: "SwiftyPrompts.OpenAI", package: "swifty-prompts"),
-                .product(name: "SwiftFirecrawl", package: "SwiftFirecrawl")
+//                .product(name: "SwiftyPrompts.OpenAI", package: "SwiftyPrompts"),
+                .product(name: "SwiftyPrompts.Anthropic", package: "swifty-prompts"), //, condition: .when(platforms: [.macOS, .iOS, .tvOS, .watchOS, .visionOS])),
+//                .product(name: "SwiftyPrompts.Anthropic", package: "SwiftyPrompts"),
+              .product(name: "SwiftyPrompts.xAI", package: "swifty-prompts"),
+//                .product(name: "SwiftyPrompts.xAI", package: "SwiftyPrompts"),
+                .product(name: "SwiftyPrompts.VaporSupport", package: "swifty-prompts"),
+//                  .product(name: "SwiftyPrompts.VaporSupport", package: "SwiftyPrompts"),
+                .product(name: "SwiftFirecrawl", package: "SwiftFirecrawl", condition: .when(platforms: [.macCatalyst, .macOS, .iOS, .watchOS, .visionOS])),
+                .product(name: "MCP", package: "swift-sdk"),
+                .product(name: "MCPHelpers", package: "mcp-swift-sdk-helpers"),
+                .product(name: "SystemPackage", package: "swift-system")
+                
+//                .product(name: "SwiftyJsonSchema", package: "swifty-json-schema"),
+               
             ]),
+        .target(
+            name: "AafeeLib.Vapor",
+            dependencies: [
+                "AafeeLib",
+            ],
+            path: "Sources/VaporSupport"
+        ),
         .executableTarget(
             name: "AafeeDemo",
             dependencies: [
                 "AafeeLib",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                .product(name: "Logging", package: "swift-log")
+                .product(name: "Logging", package: "swift-log"),
+                .product(name: "MCP", package: "swift-sdk")
             ]),
         .testTarget(
             name: "AafeeLibTests",

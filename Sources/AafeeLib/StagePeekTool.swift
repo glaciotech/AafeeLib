@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import SwiftUI
 
 @propertyWrapper
 class StateValue<Value> {
@@ -56,7 +55,7 @@ public struct StagePeekTool: FlowStage {
     }
     
     public func execute(_ input: InOutType?) async throws -> InOutType {
-        stageInput = input?.text ?? "NO INPUT"
+        stageInput = (try? input?.text) ?? "NO INPUT"
         logger.debug("\(stageInput)")
         return input ?? .none
     }

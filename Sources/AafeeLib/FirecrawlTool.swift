@@ -5,6 +5,9 @@
 //  Created by Peter Liddle on 5/9/25.
 //
 
+
+#if !os(Linux) // Not currently supported on Linux
+
 import Foundation
 import SwiftFirecrawl
 import Logging
@@ -48,3 +51,5 @@ public struct FirecrawlTool: FlowStage {
         return .md(md)
     }
 }
+
+#endif
